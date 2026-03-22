@@ -1,2 +1,0 @@
-# getreceiptIOS
-Just Test it

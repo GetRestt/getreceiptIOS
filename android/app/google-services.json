@@ -1,0 +1,46 @@
+{
+  "project_info": {
+    "project_number": "188079814450",
+    "project_id": "get-receipt-f831c",
+    "storage_bucket": "get-receipt-f831c.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:188079814450:android:3d1f19657851d2f73cc92b",
+        "android_client_info": {
+          "package_name": "com.get_receipt"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "188079814450-71sfig1mq1ea7sjvqblgvf93ncqmf22l.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCtU8V-ej6FpX2DXaBY4RYnq7EN-qZEo4Q"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "188079814450-71sfig1mq1ea7sjvqblgvf93ncqmf22l.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "188079814450-pf4ev5fsbdjugglffdp3f48m31cdibtr.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.getReceipt"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
