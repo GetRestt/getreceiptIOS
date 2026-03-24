@@ -28,15 +28,12 @@ require File.expand_path(File.join('packages', 'flutter_tools', 'bin', 'podhelpe
 flutter_ios_podfile_setup
 
 target 'Runner' do
-  # This applies globally, but we'll override it conditionally below.
-  use_frameworks!
-
   use_modular_headers!
+  pod 'Firebase/Core'
 
   flutter_install_all_ios_pods File.dirname(File.realpath(__FILE__))
 end
 
-# Conditional `use_frameworks! :linkage => :static` for `flutter_web_auth_2`
 post_install do |installer|
   installer.pods_project.targets.each do |target|
     flutter_additional_ios_build_settings(target)
@@ -48,6 +45,5 @@ post_install do |installer|
         config.build_settings['LINKAGE'] = 'static'
       end
     end
-
   end
 end
