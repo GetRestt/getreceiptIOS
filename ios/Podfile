@@ -7,23 +7,48 @@ project 'Runner', {
   'Profile' => :release,
   'Release' => :release,
 }
-# ... (standard flutter_root and plugin setup)
+
+def flutter_root
+  generated_xcode_build_settings_path = File.expand_path(File.join('..', 'Flutter', 'Generated.xcconfig'), __FILE__)
+  unless File.exist?(generated_xcode_build_settings_path)
+    raise "#{generated_xcode_build_settings_path} must exist. Run flutter pub get first"
+  end
+
+  File.foreach(generated_xcode_build_settings_path) do |line|
+    matches = line.match(/FLUTTER_ROOT\=(.*)/)
+    return matches[1].strip if matches
+  end
+  raise "FLUTTER_ROOT not found in #{generated_xcode_build_settings_path}"
+end
+
+require File.expand_path(File.join('packages', 'flutter_tools', 'bin', 'podhelper'), flutter_root)
+
+flutter_ios_podfile_setup
+
 target 'Runner' do
+  # Use static frameworks to prevent Firebase dynamic linking issues
   use_frameworks! :linkage => :static
+
   flutter_install_all_ios_pods File.dirname(File.realpath(__FILE__))
-  # ... (your pod declarations)
+
+  # Firebase Pods
+  pod 'Firebase/Core'
+  pod 'Firebase/Messaging'
 end
 
 post_install do |installer|
   installer.pods_project.targets.each do |target|
     flutter_additional_ios_build_settings(target)
-    
+
     target.build_configurations.each do |config|
-      # FIX: Explicitly allow non-modular headers for all pods to satisfy Xcode 15/16
+      # FIX: Solves "Include of non-modular header inside framework module"
       config.build_settings['CLANG_ALLOW_NON_MODULAR_INCLUDES_IN_FRAMEWORK_MODULES'] = 'YES'
+      
+      # Ensures deployment target matches Podfile
+      config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '13.0'
     end
 
-    # Specific fix for flutter_web_auth_2
+    # Specific fix for flutter_web_auth_2 compatibility
     if target.name == 'flutter_web_auth_2'
       target.build_configurations.each do |config|
         config.build_settings['USE_FRAMEWORKS'] = 'YES'
