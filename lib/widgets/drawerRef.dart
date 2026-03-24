@@ -6,7 +6,9 @@ import 'package:get_receipt/pages/clients_page.dart';
 import 'package:get_receipt/pages/invite_friend.dart';
 import 'package:get_receipt/pages/report_page.dart';
 import 'package:get_receipt/pages/history_page.dart';
-
+import 'package:get_receipt/services/log_in_service.dart';
+import 'package:provider/provider.dart';
+import '../helpers/database_helper.dart';
 import '../pages/qr_scan_page.dart';
 import 'FooterRef.dart';
 
@@ -118,8 +120,15 @@ class _DrawerRefState extends State<DrawerRef> {
                       drawerTextButtonList(context,Icons.settings_overscan,'QR Scaner',QrCodeScan()),*/
                       Divider(height: MediaQuery.of(context).size.height *0.05, thickness: 1.0,),
                       drawerTextButtonList(context,Icons.arrow_forward_outlined,'Invite Friends',InviteFriends()),
-                      //Divider(height: MediaQuery.of(context).size.height *0.03, thickness: 1.0,),
-                      //drawerTextButtonList(context,Icons.settings,'Settings',Setting()),
+                      Divider(height: MediaQuery.of(context).size.height *0.03, thickness: 1.0,),
+                      ElevatedButton(
+                        onPressed: () {
+                          LoginService loginService = Provider.of<LoginService>(context, listen: false);
+                          var uid = loginService.loggedInUserModel!.uid!;
+                          confirmAndDelete(context, uid);
+                        },
+                        child: Text("Delete"),
+                      )
                     ],
                   ),
                 )
@@ -129,6 +138,47 @@ class _DrawerRefState extends State<DrawerRef> {
         ),
       ),
     );
+  }
+
+  Future<void> confirmAndDelete(
+      BuildContext context,
+      String documentId,
+      ) async {
+    final bool? confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) {
+        return AlertDialog(
+          title: Text("Warning"),
+          content: Text("Are you sure you want to delete this record?"),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.pop(context, false),
+              child: Text("Cancel"),
+            ),
+            ElevatedButton(
+              onPressed: () => Navigator.pop(context, true),
+              child: Text("Yes"),
+            ),
+          ],
+        );
+      },
+    );
+
+    // 🚫 User pressed cancel or closed dialog
+    if (confirmed != true) return;
+
+    // ✅ Proceed with delete
+    try {
+      await DatabaseHelper.instance.deleteUser(documentId);
+
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Deleted successfully")),
+      );
+    } catch (e) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text("Delete failed")),
+      );
+    }
   }
 
   TextButton drawerTextButtonList(BuildContext context, IconData icon, String title, Widget pageTo) {

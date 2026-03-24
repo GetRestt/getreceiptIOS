@@ -216,6 +216,26 @@ class DatabaseHelper {
     }
   }
 
+  Future<void> deleteUser(String documentId) async {
+    databases ?? init();
+
+    try {
+      await databases!.deleteDocument(
+        databaseId: "64021c676587c617b2ba",
+        collectionId: "640225bea15a95e0a6d1",
+        documentId: documentId,
+      );
+
+    } on AppwriteException catch (e) {
+      if (e.message ==
+          "The current user is not authorized to perform the requested action.") {
+        AuthHelper.instance.logout();
+        Utils.mainAppNav.currentState!.pushNamed('/auth');
+      }
+      rethrow;
+    }
+  }
+
 
 
 }
