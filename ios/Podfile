@@ -24,24 +24,19 @@ require File.expand_path(File.join('packages', 'flutter_tools', 'bin', 'podhelpe
 flutter_ios_podfile_setup
 
 target 'Runner' do
-  # Needed for flutter_web_auth_2
-  use_frameworks! :linkage => :static
+  use_frameworks! :linkage => :static  # Required for flutter_web_auth_2
 
-  # Force Firebase pods to use modular headers (avoids non-modular header errors)
-  pod 'Firebase/Core', :modular_headers => true
-  pod 'Firebase/Messaging', :modular_headers => true
-
-  # Let Flutter handle all other pods
+  # Flutter will install Firebase and other pods automatically
   flutter_install_all_ios_pods File.dirname(File.realpath(__FILE__))
 end
 
 post_install do |installer|
   installer.pods_project.targets.each do |target|
     flutter_additional_ios_build_settings(target)
-  end
 
-  # ⚡ Fix for non-modular headers inside framework modules
-  installer.pods_project.build_configurations.each do |config|
-    config.build_settings['CLANG_ALLOW_NON_MODULAR_INCLUDES_IN_FRAMEWORK_MODULES'] = 'YES'
+    # Allow non-modular headers (fixes Firebase.h compile errors)
+    target.build_configurations.each do |config|
+      config.build_settings['CLANG_ALLOW_NON_MODULAR_INCLUDES_IN_FRAMEWORK_MODULES'] = 'YES'
+    end
   end
 end
