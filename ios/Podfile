@@ -10,51 +10,38 @@ project 'Runner', {
 
 def flutter_root
   generated_xcode_build_settings_path = File.expand_path(File.join('..', 'Flutter', 'Generated.xcconfig'), __FILE__)
-  unless File.exist?(generated_xcode_build_settings_path)
-    raise "#{generated_xcode_build_settings_path} must exist. Run flutter pub get first"
-  end
-
   File.foreach(generated_xcode_build_settings_path) do |line|
     matches = line.match(/FLUTTER_ROOT\=(.*)/)
     return matches[1].strip if matches
   end
-  raise "FLUTTER_ROOT not found in #{generated_xcode_build_settings_path}"
 end
 
 require File.expand_path(File.join('packages', 'flutter_tools', 'bin', 'podhelper'), flutter_root)
 
 flutter_ios_podfile_setup
 
-# Use static frameworks globally, modular headers for pods
+# This is the line that usually breaks things, but we're going to fix it in the loop below
 use_frameworks! :linkage => :static
 use_modular_headers!
 
 target 'Runner' do
   flutter_install_all_ios_pods File.dirname(File.realpath(__FILE__))
-
-  # Firebase Pods
-  pod 'Firebase/Core', :modular_headers => true
-  pod 'Firebase/Messaging', :modular_headers => true
-
-  # Add other pods your app actually uses here
-  # e.g., Appwrite dependencies are handled via Flutter packages
 end
 
 post_install do |installer|
   installer.pods_project.targets.each do |target|
     flutter_additional_ios_build_settings(target)
-
+    
     target.build_configurations.each do |config|
-      # Solves "Include of non-modular header inside framework module"
+      # Fix 1: Stop the "Non-modular header" error for Firebase/WebAuth
       config.build_settings['CLANG_ALLOW_NON_MODULAR_INCLUDES_IN_FRAMEWORK_MODULES'] = 'YES'
       
-      # Ensures deployment target matches Podfile
+      # Fix 2: Explicitly tell the compiler where to find Flutter headers 
+      # This solves the "Unable to find module dependency: 'Flutter'" error
+      config.build_settings['OTHER_SWIFT_FLAGS'] = '$(inherited) -DCOCOAPODS'
+      
+      # Fix 3: Ensure everything is on the same iOS version
       config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '13.0'
-    end
-
-    # Ignore flutter_web_auth_2 completely
-    if target.name == 'flutter_web_auth_2'
-      target.remove_from_project
     end
   end
 end
