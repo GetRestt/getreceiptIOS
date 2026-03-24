@@ -20,10 +20,6 @@ require File.expand_path(File.join('packages', 'flutter_tools', 'bin', 'podhelpe
 
 flutter_ios_podfile_setup
 
-# This is the line that usually breaks things, but we're going to fix it in the loop below
-use_frameworks! :linkage => :static
-use_modular_headers!
-
 target 'Runner' do
   flutter_install_all_ios_pods File.dirname(File.realpath(__FILE__))
 end
@@ -31,17 +27,12 @@ end
 post_install do |installer|
   installer.pods_project.targets.each do |target|
     flutter_additional_ios_build_settings(target)
-    
+
     target.build_configurations.each do |config|
-      # Fix 1: Stop the "Non-modular header" error for Firebase/WebAuth
-      config.build_settings['CLANG_ALLOW_NON_MODULAR_INCLUDES_IN_FRAMEWORK_MODULES'] = 'YES'
-      
-      # Fix 2: Explicitly tell the compiler where to find Flutter headers 
-      # This solves the "Unable to find module dependency: 'Flutter'" error
-      config.build_settings['OTHER_SWIFT_FLAGS'] = '$(inherited) -DCOCOAPODS'
-      
-      # Fix 3: Ensure everything is on the same iOS version
       config.build_settings['IPHONEOS_DEPLOYMENT_TARGET'] = '13.0'
+      
+      # Only this fix — nothing else
+      config.build_settings['CLANG_ALLOW_NON_MODULAR_INCLUDES_IN_FRAMEWORK_MODULES'] = 'YES'
     end
   end
 end
