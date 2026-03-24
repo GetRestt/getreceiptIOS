@@ -23,12 +23,10 @@ require File.expand_path(File.join('packages', 'flutter_tools', 'bin', 'podhelpe
 flutter_ios_podfile_setup
 
 target 'Runner' do
-  use_frameworks! :linkage => :static
+  # Remove use_frameworks! entirely
+  # use_frameworks! :linkage => :static   <-- REMOVE THIS
 
-  # Make Firebase pods modular to avoid non-modular header errors
-  pod 'Firebase/Core', :modular_headers => true
-  pod 'Firebase/Messaging', :modular_headers => true
-
+  # Let Flutter handle pod setup
   flutter_install_all_ios_pods File.dirname(File.realpath(__FILE__))
 end
 
